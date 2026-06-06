@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECC Cryptography System</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #0d1117;
+    --surface2: #1c2230;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #d29922;
+    --accent4: #f78166;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), #000000);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  header span {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .badge {
+    margin-left: auto;
+    background: rgba(88,166,255,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    overflow-x: auto;
+    gap: 2px;
+  }
+  .tab {
+    padding: 12px 18px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--sans);
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-icon { font-size: 15px; }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px;
+  }
+
+  .panel { display: none; animation: fadeIn 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  input, textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 9px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    transition: border 0.2s;
+    margin-bottom: 14px;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn {
+    padding: 9px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--sans);
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0d1117;
+  }
+  .btn-primary:hover { background: #79c0ff; transform: translateY(-1px); }
+  .btn-green {
+    background: var(--accent2);
+    color: #0d1117;
+  }
+  .btn-green:hover { background: #56d364; transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+  .output-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--accent2);
+    word-break: break-all;
+    line-height: 1.7;
+    min-height: 44px;
+    margin-top: 6px;
+    position: relative;
+  }
+  .output-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    margin-top: 12px;
+  }
+  .output-label:first-child { margin-top: 0; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+  .chip-blue { background: rgba(88,166,255,0.12); color: var(--accent); border: 1px solid rgba(88,166,255,0.25); }
+  .chip-green { background: rgba(63,185,80,0.12); color: var(--accent2); border: 1px solid rgba(63,185,80,0.25); }
+  .chip-red { background: rgba(247,129,102,0.12); color: var(--accent4); border: 1px solid rgba(247,129,102,0.25); }
+
+  .param-table { width: 100%; border-collapse: collapse; }
+  .param-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+  .param-table td:first-child { color: var(--muted); width: 40%; }
+  .param-table td:last-child { color: var(--accent2); word-break: break-all; }
+  .param-table tr:last-child td { border-bottom: none; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  canvas {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    display: block;
+    width: 100%;
+  }
+
+  .steps {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .step.done .step-num { background: var(--accent2); border-color: var(--accent2); color: #0d1117; }
+  .step.active .step-num { background: var(--accent); border-color: var(--accent); color: #0d1117; }
+  .step-arrow { color: var(--border); font-size: 10px; }
+
+  .alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+  .alert-info { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2); color: #a5c8ff; }
+  .alert-success { background: rgba(63,185,80,0.08); border: 1px solid rgba(63,185,80,0.2); color: #7ee787; }
+  .alert-warn { background: rgba(210,153,34,0.08); border: 1px solid rgba(210,153,34,0.2); color: #e3b341; }
+
+  .calc-op-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .op-display {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent3);
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #0d1117;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🔐</div>
+  <div>
+    <h1>ECC Cryptography System</h1>
+    <span>Elliptic Curve Cryptography — Topik 10</span>
+  </div>
+  <div class="badge">secp256k1</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('info', this)">
+    <span class="tab-icon"></span> Info Kurva
+  </button>
+  <button class="tab" onclick="showTab('ecdh', this)">
+    <span class="tab-icon"></span> ECDH Key Exchange
+  </button>
+  <button class="tab" onclick="showTab('enc', this)">
+    <span class="tab-icon"></span> Enkripsi / Dekripsi
+  </button>
+  <button class="tab" onclick="showTab('ecdsa', this)">
+    <span class="tab-icon"></span> Digital Signature
+  </button>
+  <button class="tab" onclick="showTab('calc', this)">
+    <span class="tab-icon"></span> Kalkulator ECC
+  </button>
+</div>
+
+<main>
+
+<div class="panel active" id="panel-info">
+  <div class="section-title">Parameter Kurva Eliptik</div>
+  <div class="section-desc">Sistem menggunakan kurva standar <strong>secp256k1</strong> dengan persamaan: <code style="color:var(--accent);font-family:var(--mono)">y² = x³ + 7 (mod p)</code></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Parameter Kurva</div>
+      <table class="param-table">
+        <tr><td>Nama Kurva</td><td style="color:var(--accent)">secp256k1</td></tr>
+        <tr><td>Persamaan</td><td>y² = x³ + ax + b</td></tr>
+        <tr><td>a</td><td>0</td></tr>
+        <tr><td>b</td><td>7</td></tr>
+        <tr><td>Bit Size</td><td>256-bit</td></tr>
+        <tr><td>Field</td><td>Prime Field (Fp)</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Titik Generator (G)</div>
+      <div class="output-label">Gx</div>
+      <div class="output-box" style="font-size:10px;color:var(--accent3)">79BE667EF9DCBBAC55A06295CE870B07<br>029BFCDB2DCE28D959F2815B16F81798</div>
+      <div class="output-label">Gy</div>
+      <div class="output-box" style="font-size:10px;color:var(--accent3)">483ADA7726A3C4655DA4FBFC0E1108A8<br>FD17B448A68554199C47D08FFB10D4B8</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Prime p & Ordo n</div>
+    <div class="output-label">Modulus Prima (p)</div>
+    <div class="output-box" style="font-size:10.5px">FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F</div>
+    <div class="output-label">Ordo Kurva (n)</div>
+    <div class="output-box" style="font-size:10.5px">FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Visualisasi Kurva (Model Sederhana: y² = x³ + 7 mod 97)</div>
+    <canvas id="curveCanvas" height="260"></canvas>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
+      Titik-titik valid pada kurva y² = x³ + 7 (mod 97) — representasi finite field kecil
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-ecdh">
+  <div class="section-title">ECDH Key Exchange</div>
+  <div class="section-desc">Elliptic-curve Diffie–Hellman memungkinkan dua pihak membangun shared secret melalui kanal publik tanpa mengirim kunci privat.</div>
+
+  <div class="steps">
+    <div class="step done" id="step1"><div class="step-num">1</div> Generate Kunci</div>
+    <div class="step-arrow">›</div>
+    <div class="step" id="step2"><div class="step-num">2</div> Tukar Kunci Publik</div>
+    <div class="step-arrow">›</div>
+    <div class="step" id="step3"><div class="step-num">3</div> Hitung Shared Secret</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--accent)">Alice</div>
+      <button class="btn btn-primary" onclick="generateKeyPair('alice')" id="btnAlice">Generate Kunci Alice</button>
+      <div class="output-label" style="margin-top:14px">Private Key (dA)</div>
+      <div class="output-box" id="alice-priv" style="font-size:10px;color:var(--accent4)">—</div>
+      <div class="output-label">Public Key (QA = dA·G)</div>
+      <div class="output-box" id="alice-pub" style="font-size:10px">—</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--accent2)">Bob</div>
+      <button class="btn btn-green" onclick="generateKeyPair('bob')" id="btnBob">Generate Kunci Bob</button>
+      <div class="output-label" style="margin-top:14px">Private Key (dB)</div>
+      <div class="output-box" id="bob-priv" style="font-size:10px;color:var(--accent4)">—</div>
+      <div class="output-label">Public Key (QB = dB·G)</div>
+      <div class="output-box" id="bob-pub" style="font-size:10px">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Hitung Shared Secret</div>
+    <div class="alert alert-info">Alice menghitung: S = dA·QB &nbsp;|&nbsp; Bob menghitung: S = dB·QA &nbsp;→&nbsp; Hasilnya sama!</div>
+    <button class="btn btn-primary" onclick="computeShared()" id="btnShared">Hitung Shared Secret</button>
+    <div class="output-label" style="margin-top:14px">Shared Secret Alice (dA·QB).x</div>
+    <div class="output-box" id="shared-alice">—</div>
+    <div class="output-label">Shared Secret Bob (dB·QA).x</div>
+    <div class="output-box" id="shared-bob">—</div>
+    <div class="output-label">Status</div>
+    <div id="shared-status" style="margin-top:4px"></div>
+  </div>
+</div>
+
+<div class="panel" id="panel-enc">
+  <div class="section-title">Enkripsi & Dekripsi Pesan</div>
+  <div class="section-desc">Enkripsi pesan teks menggunakan shared secret dari ECDH sebagai kunci XOR. Generate keypair di tab ECDH terlebih dahulu.</div>
+
+  <div class="alert alert-warn">Untuk menggunakan fitur ini, generate keypair Alice & Bob di tab ECDH terlebih dahulu.</div>
+
+  <div class="card">
+    <div class="card-title">Enkripsi Pesan</div>
+    <label>Pesan Plaintext</label>
+    <textarea id="plaintext" placeholder="Ketik pesan yang akan dienkripsi..."></textarea>
+    <label>Enkripsi menggunakan kunci</label>
+    <select id="enc-key-select">
+      <option value="alice">Shared Secret (dari sudut pandang Alice)</option>
+      <option value="bob">Shared Secret (dari sudut pandang Bob)</option>
+    </select>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="encryptMsg()">Enkripsi</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('plaintext').value=''">Hapus</button>
+    </div>
+    <div class="output-label" style="margin-top:14px">Ciphertext (Hex)</div>
+    <div class="output-box" id="ciphertext-out" style="color:var(--accent3)">—</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Dekripsi Pesan</div>
+    <label>Ciphertext (Hex)</label>
+    <textarea id="ciphertext-in" placeholder="Paste ciphertext hex di sini..."></textarea>
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="decryptMsg()">Dekripsi</button>
+      <button class="btn btn-ghost" onclick="pasteFromEnc()">Paste dari Enkripsi</button>
+    </div>
+    <div class="output-label" style="margin-top:14px">Hasil Dekripsi</div>
+    <div class="output-box" id="decrypted-out" style="color:var(--accent2)">—</div>
+  </div>
+</div>
+
+<div class="panel" id="panel-ecdsa">
+  <div class="section-title">Digital Signature (ECDSA)</div>
+  <div class="section-desc">Elliptic Curve Digital Signature Algorithm — menandatangani pesan dengan kunci privat dan memverifikasi dengan kunci publik.</div>
+
+  <div class="alert alert-info">Generate keypair Alice di tab ECDH terlebih dahulu untuk menggunakan fitur ini.</div>
+
+  <div class="card">
+    <div class="card-title">Tanda Tangan (Sign)</div>
+    <label>Pesan</label>
+    <textarea id="sign-msg" placeholder="Ketik pesan yang akan ditandatangani..."></textarea>
+    <label>Penanda Tangan</label>
+    <select id="signer-select">
+      <option value="alice">Alice (menggunakan private key Alice)</option>
+    </select>
+    <button class="btn btn-primary" onclick="signMessage()">Tanda Tangani</button>
+    <div class="output-label" style="margin-top:14px">Hash Pesan (SHA-256 simulasi)</div>
+    <div class="output-box" id="msg-hash" style="font-size:10px">—</div>
+    <div class="output-label">Signature (r, s)</div>
+    <div class="output-box" id="sig-out" style="font-size:10px">—</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Verifikasi Tanda Tangan</div>
+    <label>Pesan Asli</label>
+    <input type="text" id="verify-msg" placeholder="Pesan yang ingin diverifikasi...">
+    <label>Signature (r,s) — klik "Isi Otomatis" atau paste hex</label>
+    <textarea id="verify-sig" placeholder="r: [hex]&#10;s: [hex]" style="min-height:64px"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="verifySignature()">Verifikasi</button>
+      <button class="btn btn-ghost" onclick="autofillVerify()">Isi Otomatis</button>
+    </div>
+    <div class="output-label" style="margin-top:14px">Hasil Verifikasi</div>
+    <div id="verify-result" style="margin-top:6px"></div>
+  </div>
+</div>
+
+<div class="panel" id="panel-calc">
+  <div class="section-title">Kalkulator ECC</div>
+  <div class="section-desc">Alat bantu perhitungan manual operasi titik pada kurva eliptik menggunakan field prima kecil untuk kemudahan verifikasi.</div>
+
+  <div class="card">
+    <div class="card-title">Parameter Field</div>
+    <div class="grid-2">
+      <div>
+        <label>Prima (p)</label>
+        <input type="number" id="calc-p" value="97" min="5">
+      </div>
+      <div>
+        <label>Koefisien b (a=0)</label>
+        <input type="number" id="calc-b" value="7" min="0">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Penjumlahan Titik: P + Q</div>
+    <div class="grid-2">
+      <div>
+        <label>P.x</label><input type="number" id="px" value="3">
+        <label>P.y</label><input type="number" id="py" value="6">
+      </div>
+      <div>
+        <label>Q.x</label><input type="number" id="qx" value="80">
+        <label>Q.y</label><input type="number" id="qy" value="10">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calcAdd()">Hitung P + Q</button>
+    <div class="output-label" style="margin-top:14px">Hasil R = P + Q</div>
+    <div class="output-box" id="calc-add-result">—</div>
+    <div class="output-label">Langkah Perhitungan</div>
+    <div class="output-box" id="calc-add-steps" style="color:var(--muted);line-height:1.9">—</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Perkalian Skalar: k·G</div>
+    <div class="grid-2">
+      <div>
+        <label>Skalar (k)</label>
+        <input type="number" id="calc-k" value="5" min="1">
+      </div>
+      <div>
+        <label>Titik G.x</label>
+        <input type="number" id="calc-gx" value="3">
+      </div>
+    </div>
+    <label>Titik G.y</label>
+    <input type="number" id="calc-gy" value="6">
+    <button class="btn btn-primary" onclick="calcMult()">Hitung k·G</button>
+    <div class="output-label" style="margin-top:14px">Hasil k·G</div>
+    <div class="output-box" id="calc-mult-result">—</div>
+    <div class="output-label">Iterasi Double-and-Add</div>
+    <div class="output-box" id="calc-mult-steps" style="color:var(--muted);line-height:1.9;font-size:11px">—</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const P256 = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
+const A256 = BigInt(0);
+const B256 = BigInt(7);
+const GX   = BigInt('0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798');
+const GY   = BigInt('0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8');
+const N256 = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141');
+const G    = { x: GX, y: GY };
+
+function modInverse(a, m) {
+  a = ((a % m) + m) % m;
+  let [old_r, r] = [a, m], [old_s, s] = [1n, 0n];
+  while (r !== 0n) {
+    const q = old_r / r;
+    [old_r, r] = [r, old_r - q * r];
+    [old_s, s] = [s, old_s - q * s];
+  }
+  return ((old_s % m) + m) % m;
+}
+
+function pointAdd(P, Q, p = P256, a = A256) {
+  if (P === null) return Q;
+  if (Q === null) return P;
+  if (P.x === Q.x && ((P.y + Q.y) % p === 0n)) return null;
+  let lam;
+  if (P.x === Q.x && P.y === Q.y) {
+    lam = (3n * P.x * P.x + a) * modInverse(2n * P.y, p) % p;
+  } else {
+    lam = ((Q.y - P.y) * modInverse(Q.x - P.x, p) % p + p) % p;
+  }
+  const Rx = ((lam * lam - P.x - Q.x) % p + p) % p;
+  const Ry = ((lam * (P.x - Rx) - P.y) % p + p) % p;
+  return { x: Rx, y: Ry };
+}
+
+function scalarMult(k, P, p = P256, a = A256) {
+  let result = null, addend = { x: P.x, y: P.y };
+  while (k > 0n) {
+    if (k & 1n) result = pointAdd(result, addend, p, a);
+    addend = pointAdd(addend, addend, p, a);
+    k >>= 1n;
+  }
+  return result;
+}
+
+function randBigInt(max) {
+  const bytes = Math.ceil(max.toString(16).length / 2);
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  let hex = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+  return (BigInt('0x' + hex) % (max - 2n)) + 1n;
+}
+
+function toHex(b) { return b.toString(16).toUpperCase().padStart(64, '0'); }
+function shortHex(b) { const h = toHex(b); return h.slice(0,8) + '...' + h.slice(-8); }
+
+let state = { alice: null, bob: null, sharedAlice: null, sharedBob: null };
+let lastSignature = null, lastSignMsg = '';
+
+function showTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function drawCurve() {
+  const canvas = document.getElementById('curveCanvas');
+  const ctx = canvas.getContext('2d');
+  const p = 97, b = 7;
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 860;
+  canvas.height = 260 * (window.devicePixelRatio || 1);
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  const W = canvas.offsetWidth || 860, H = 260;
+  const pad = 28;
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.strokeStyle = '#1c2230'; ctx.lineWidth = 1;
+  for (let x = pad; x <= W - pad; x += (W - 2*pad) / 10) {
+    ctx.beginPath(); ctx.moveTo(x, pad); ctx.lineTo(x, H - pad); ctx.stroke();
+  }
+  for (let y = pad; y <= H - pad; y += (H - 2*pad) / 6) {
+    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad, H/2); ctx.lineTo(W-pad, H/2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W/2, pad); ctx.lineTo(W/2, H-pad); ctx.stroke();
+
+  const points = [];
+  for (let x = 0; x < p; x++) {
+    const rhs = ((BigInt(x)**3n + BigInt(b)) % BigInt(p) + BigInt(p)) % BigInt(p);
+    for (let y = 0; y < p; y++) {
+      if ((BigInt(y) * BigInt(y)) % BigInt(p) === rhs) points.push({x, y});
+    }
+  }
+
+  const sx = x => pad + ((x / p) * (W - 2*pad));
+  const sy = y => (H - pad) - ((y / p) * (H - 2*pad));
+
+  points.forEach(pt => {
+    const grd = ctx.createRadialGradient(sx(pt.x), sy(pt.y), 0, sx(pt.x), sy(pt.y), 4);
+    grd.addColorStop(0, '#58a6ff');
+    grd.addColorStop(1, 'rgba(88,166,255,0.1)');
+    ctx.beginPath();
+    ctx.arc(sx(pt.x), sy(pt.y), 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+  });
+
+  ctx.fillStyle = '#8b949e'; ctx.font = '10px JetBrains Mono';
+  ctx.fillText('0', W/2+4, H/2-4);
+  ctx.fillText('p=97', W-pad-28, H/2-6);
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillText(`${points.length} titik valid`, pad+4, pad+14);
+}
+
+window.addEventListener('load', () => { drawCurve(); });
+window.addEventListener('resize', drawCurve);
+
+function generateKeyPair(who) {
+  const priv = randBigInt(N256);
+  const pub  = scalarMult(priv, G);
+  state[who] = { priv, pub };
+
+  if (who === 'alice') {
+    document.getElementById('alice-priv').textContent = toHex(priv);
+    document.getElementById('alice-pub').textContent =
+      'x: ' + toHex(pub.x) + '\ny: ' + toHex(pub.y);
+    document.getElementById('step1').className = 'step done';
+    document.getElementById('step2').className = 'step active';
+  } else {
+    document.getElementById('bob-priv').textContent = toHex(priv);
+    document.getElementById('bob-pub').textContent =
+      'x: ' + toHex(pub.x) + '\ny: ' + toHex(pub.y);
+  }
+}
+
+function computeShared() {
+  if (!state.alice || !state.bob) {
+    alert('Generate keypair Alice dan Bob terlebih dahulu!');
+    return;
+  }
+  const sA = scalarMult(state.alice.priv, state.bob.pub);
+  const sB = scalarMult(state.bob.priv, state.alice.pub);
+  state.sharedAlice = sA.x;
+  state.sharedBob   = sB.x;
+
+  document.getElementById('shared-alice').textContent = toHex(sA.x);
+  document.getElementById('shared-bob').textContent   = toHex(sB.x);
+  document.getElementById('step2').className = 'step done';
+  document.getElementById('step3').className = 'step done';
+
+  const match = sA.x === sB.x;
+  document.getElementById('shared-status').innerHTML = match
+    ? '<span class="chip chip-green">✓ Shared Secret Identik — ECDH Berhasil!</span>'
+    : '<span class="chip chip-red">✗ Tidak cocok</span>';
+}
+
+function xorEncrypt(text, keyHex) {
+  const keyBytes = hexToBytes(keyHex.slice(0, 64));
+  const enc = [];
+  for (let i = 0; i < text.length; i++) {
+    enc.push(text.charCodeAt(i) ^ keyBytes[i % keyBytes.length]);
+  }
+  return enc.map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+
+function hexToBytes(hex) {
+  const b = [];
+  for (let i = 0; i < hex.length; i += 2) b.push(parseInt(hex.substr(i, 2), 16));
+  return b;
+}
+
+function xorDecrypt(hexStr, keyHex) {
+  const bytes = hexToBytes(hexStr);
+  const keyBytes = hexToBytes(keyHex.slice(0, 64));
+  return bytes.map((b, i) => String.fromCharCode(b ^ keyBytes[i % keyBytes.length])).join('');
+}
+
+function getSharedKey(who) {
+  const s = who === 'alice' ? state.sharedAlice : state.sharedBob;
+  return s ? toHex(s) : null;
+}
+
+function encryptMsg() {
+  const msg = document.getElementById('plaintext').value;
+  if (!msg) return;
+  const who = document.getElementById('enc-key-select').value;
+  const key = getSharedKey(who);
+  if (!key) { document.getElementById('ciphertext-out').textContent = '⚠ Generate keypair & shared secret terlebih dahulu!'; return; }
+  document.getElementById('ciphertext-out').textContent = xorEncrypt(msg, key);
+}
+
+function decryptMsg() {
+  const hex = document.getElementById('ciphertext-in').value.trim();
+  if (!hex) return;
+  const key = getSharedKey('bob') || getSharedKey('alice');
+  if (!key) { document.getElementById('decrypted-out').textContent = '⚠ Generate keypair & shared secret terlebih dahulu!'; return; }
+  document.getElementById('decrypted-out').textContent = xorDecrypt(hex, key);
+}
+
+function pasteFromEnc() {
+  document.getElementById('ciphertext-in').value = document.getElementById('ciphertext-out').textContent;
+}
+
+function simpleHash(msg) {
+  // deterministic simple hash for demo
+  let h = 0n;
+  for (let i = 0; i < msg.length; i++) {
+    h = (h * 31n + BigInt(msg.charCodeAt(i))) % N256;
+  }
+  return h === 0n ? 1n : h;
+}
+
+function signMessage() {
+  if (!state.alice) { alert('Generate keypair Alice di tab ECDH terlebih dahulu!'); return; }
+  const msg = document.getElementById('sign-msg').value;
+  if (!msg) return;
+
+  const z = simpleHash(msg);
+  const k = randBigInt(N256);
+  const R = scalarMult(k, G);
+  const r = R.x % N256;
+  const kInv = modInverse(k, N256);
+  const s = (kInv * (z + r * state.alice.priv)) % N256;
+
+  lastSignature = { r, s };
+  lastSignMsg = msg;
+
+  document.getElementById('msg-hash').textContent = toHex(z);
+  document.getElementById('sig-out').textContent = 'r: ' + toHex(r) + '\ns: ' + toHex(s);
+}
+
+function verifySignature() {
+  if (!state.alice) { alert('Butuh kunci publik Alice!'); return; }
+  const msg = document.getElementById('verify-msg').value;
+  const sigStr = document.getElementById('verify-sig').value.trim();
+  if (!msg || !sigStr) return;
+
+  try {
+    // Parse: cari semua hex string 64 karakter dalam sigStr
+    const hexMatches = sigStr.match(/[0-9a-fA-F]{64}/g);
+    if (!hexMatches || hexMatches.length < 2) throw new Error('hex not found');
+    const r = BigInt('0x' + hexMatches[0]);
+    const s = BigInt('0x' + hexMatches[1]);
+    if (r === 0n || s === 0n) throw new Error('zero r or s');
+
+    const z = simpleHash(msg);
+    const w = modInverse(s, N256);
+    const u1 = (z * w) % N256;
+    const u2 = (r * w) % N256;
+    const pt = pointAdd(scalarMult(u1, G), scalarMult(u2, state.alice.pub));
+    const valid = pt && (pt.x % N256 === r);
+    document.getElementById('verify-result').innerHTML = valid
+      ? '<span class="chip chip-green">✓ VALID — Tanda tangan sah!</span>'
+      : '<span class="chip chip-red">✗ INVALID — Tanda tangan tidak valid!</span>';
+  } catch(e) {
+    document.getElementById('verify-result').innerHTML =
+      '<span class="chip chip-red">✗ Format signature tidak valid — gunakan tombol Isi Otomatis</span>';
+  }
+}
+
+function autofillVerify() {
+  if (!lastSignature) {
+    alert('Tanda tangani pesan terlebih dahulu!');
+    return;
+  }
+  document.getElementById('verify-msg').value = lastSignMsg;
+  // Simpan sebagai dua baris jelas
+  document.getElementById('verify-sig').value =
+    'r: ' + toHex(lastSignature.r) + '\n' + 's: ' + toHex(lastSignature.s);
+}
+
+function calcAdd() {
+  const p = BigInt(document.getElementById('calc-p').value);
+  const b = BigInt(document.getElementById('calc-b').value);
+  const Px = BigInt(document.getElementById('px').value);
+  const Py = BigInt(document.getElementById('py').value);
+  const Qx = BigInt(document.getElementById('qx').value);
+  const Qy = BigInt(document.getElementById('qy').value);
+  const P = {x: Px, y: Py}, Q = {x: Qx, y: Qy};
+
+  const checkP = ((Py*Py) % p) === ((Px**3n + b) % p);
+  const checkQ = ((Qy*Qy) % p) === ((Qx**3n + b) % p);
+
+  let steps = '';
+  if (!checkP) { steps = `⚠ Titik P(${Px},${Py}) tidak berada pada kurva y²=x³+${b} (mod ${p})`; }
+  else if (!checkQ) { steps = `⚠ Titik Q(${Qx},${Qy}) tidak berada pada kurva y²=x³+${b} (mod ${p})`; }
+  else {
+    let lam;
+    if (Px === Qx && Py === Qy) {
+      lam = (3n * Px * Px) * modInverse(2n * Py, p) % p;
+      steps += `λ = (3·${Px}² × (2·${Py})⁻¹) mod ${p}\n`;
+      steps += `λ = (${3n*Px*Px} × ${modInverse(2n*Py,p)}) mod ${p} = ${lam}\n`;
+    } else {
+      lam = ((Qy - Py) * modInverse(Qx - Px, p) % p + p) % p;
+      steps += `λ = (${Qy}-${Py}) × (${Qx}-${Px})⁻¹ mod ${p}\n`;
+      steps += `λ = ${((Qy-Py)%p+p)%p} × ${modInverse(Qx-Px,p)} mod ${p} = ${lam}\n`;
+    }
+    const Rx = ((lam*lam - Px - Qx) % p + p) % p;
+    const Ry = ((lam*(Px - Rx) - Py) % p + p) % p;
+    steps += `Rx = (λ²-${Px}-${Qx}) mod ${p} = (${lam*lam}-${Px}-${Qx}) mod ${p} = ${Rx}\n`;
+    steps += `Ry = (λ·(${Px}-${Rx})-${Py}) mod ${p} = ${Ry}`;
+    const R = pointAdd(P, Q, p, 0n);
+    document.getElementById('calc-add-result').textContent = R === null
+      ? 'Titik di tak hingga (O)'
+      : `R = (${R.x}, ${R.y})`;
+  }
+  document.getElementById('calc-add-steps').textContent = steps || '—';
+}
+
+function calcMult() {
+  const p = BigInt(document.getElementById('calc-p').value);
+  const b = BigInt(document.getElementById('calc-b').value);
+  let k = BigInt(document.getElementById('calc-k').value);
+  const Gx = BigInt(document.getElementById('calc-gx').value);
+  const Gy = BigInt(document.getElementById('calc-gy').value);
+  const Gpt = {x: Gx, y: Gy};
+
+  let result = null, addend = {x:Gx, y:Gy};
+  let steps = `k = ${k} = ${k.toString(2)}₂\n`;
+  let bit = 0;
+  const kOrig = k;
+
+  while (k > 0n) {
+    if (k & 1n) {
+      result = pointAdd(result, addend, p, 0n);
+      steps += `bit[${bit}]=1 → ADD: R = (${result?.x ?? '∞'}, ${result?.y ?? '∞'})\n`;
+    } else {
+      steps += `bit[${bit}]=0 → SKIP\n`;
+    }
+    addend = pointAdd(addend, addend, p, 0n);
+    k >>= 1n; bit++;
+  }
+
+  document.getElementById('calc-mult-result').textContent = result === null
+    ? 'Titik di tak hingga (O)'
+    : `${kOrig}·G = (${result.x}, ${result.y})`;
+  document.getElementById('calc-mult-steps').textContent = steps;
+}
+</script>
+</body>
+</html>
